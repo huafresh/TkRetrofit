@@ -15,6 +15,7 @@ import org.json.JSONObject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -43,8 +44,8 @@ class TkRequest {
     private Call originalCall;
     private Type responseType;
     private Annotation[] annotations;
-    private List<IRequestInterceptor> requestInterceptors;
-    private List<IResponseInterceptor> responseInterceptors;
+    private List<IRequestInterceptor> requestInterceptors = new ArrayList<>();
+    private List<IResponseInterceptor> responseInterceptors = new ArrayList<>();
 
     private @Nullable
     RequestBean resolveRequestBean(Request request) {
@@ -238,10 +239,18 @@ class TkRequest {
         public <T> T create(final Class<T> service) {
             if (retrofit == null) {
                 TkRequest tkRequest = new TkRequest();
-                tkRequest.requestInterceptors.addAll(TkRetrofit.requestInterceptors);
-                tkRequest.responseInterceptors.addAll(TkRetrofit.responseInterceptors);
-                tkRequest.requestInterceptors.add(requestInterceptor);
-                tkRequest.responseInterceptors.add(responseInterceptor);
+                if (TkRetrofit.requestInterceptors != null) {
+                    tkRequest.requestInterceptors.addAll(TkRetrofit.requestInterceptors);
+                }
+                if (TkRetrofit.responseInterceptors != null) {
+                    tkRequest.responseInterceptors.addAll(TkRetrofit.responseInterceptors);
+                }
+                if (requestInterceptor != null) {
+                    tkRequest.requestInterceptors.add(requestInterceptor);
+                }
+                if (responseInterceptor != null) {
+                    tkRequest.responseInterceptors.add(responseInterceptor);
+                }
                 TkCallAdapter tkCallAdapter = new TkCallAdapter(tkRequest);
                 retrofit = new Retrofit.Builder()
                         .addCallAdapterFactory(tkCallAdapter)

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--http 请求配置文件
+    state:机房状态 (1可用)
+    domain:配置域名地址(配置了域名的情况下，优先试用域名)
+    ip:配置IP地址
+    method:指定http请求方式，支持post和get；默认为post
+    route:设置是测速,用于配置了多个地址的情况；
+    retry:设置连接失败重试次数
+    timeout:设置连接超时时间，以毫秒为单位
+    certificatePath:指定assets目录下证书存放路径；如果是https请求，需要指定，http请求无需指定,证书可以cer,crt等格式；
+     -->
+<rooms
+    description="服务器地址配置，speedUrl为测速地址，updateUrl为更新地址"
+    speedUrl=""
+    updateUrl="https://tianxia.cindasc.com:9602/servlet/json?">
+    <!--机房1   生产环境-->
+    <room
+        name="android_room1"
+        description="测试第一机房"
+        mainsite="URL_INVEST_COUNSELOR"
+        state="1">
+
+        <!-- *********************** 旧版本综合业务地址，下个版本上线前删除 ************************ -->
+        <server
+            name="ZHYW_URL"
+            description="综合业务接入地址：版本更新、公告、意见反馈、自选股同步、"
+            domain=""
+            ip="http://106.39.48.174:8086/servlet/json?"
+            retry="0"
+            route="true"
+            timeout="20000"/>
+        <!-- *********************** 旧版本综合业务地址，下个版本上线前删除 ************************ -->
+
+        <server
+            name="FILE_UPLOAD_URL"
+            description="文件服务器上传http接入地址"
+            domain="http://106.39.48.182:8091/servlet/file/UploadAction?"
+            method="post"
+            retry="0"
+            route="true"
+            timeout="30000"/>
+
+        <server
+            name="SHARE_URL"
+            description="分享用的地址"
+            domain="http://106.39.48.174:8090/osoa/download.html"
+            ip=""
+            method="get"
+            retry="0"
+            route="true"
+            timeout="30000"/>
+
+        <server
+            name="URL_MALL"
+            certificatePath=""
+            description="商城业务接入层地址"
+            domain="http://106.39.48.174:8089/servlet/json?"
+            ip=""
+            retry="0"
+            route="true"
+            timeout="30000"/>
+
+
+        <server
+            name="HQ_INFO_HK_URL"
+            description="港股资讯"
+            domain="http://119.23.143.58:40001/servlet/json"/>
+
+
+        <!--http://183.57.43.58:8089/servlet/json-->
+        <server
+            name="HQ_NDO_URL"
+            description="行情股期权接口地址"
+            domain="http://zmall.hazq.com:8985/market/json"
+            />
+
+        <!--港股通-->
+        <server
+            name="TRADE_GGT"
+            description="交易模块的港股通地址"
+            domain="www/m/trade/views/ggt/position/ggtHolding.html"/>
+
+        <server
+            name="TRADE_BUY"
+            description="交易模块的港股通买入地址"
+            domain="www/m/trade/views/ggt/order/ggtBuy.html"/>
+
+        <server
+            name="TRADE_SELL"
+            description="交易模块的港股通卖出地址"
+            domain="www/m/trade/views/ggt/order/ggtSell.html"/>
+
+        <!--股转系统-->
+        <server
+            name="TRADE_HOLDING"
+            description="交易模块的三板地址"
+            domain="www/m/trade/views/third/asset/holding.html"/>
+
+        <!--可转债配售-->
+        <server
+            name="TRADE_CONVERPS"
+            description="交易模块的可转债配售地址"
+            domain="www/m/trade/views/debtzg/converPS.html"/>
+
+        <!--转股回售-->
+        <server
+            name="TRADE_CONVERHS"
+            description="交易模块的可转债配售地址"
+            domain="www/m/trade/views/debtzg/converHS.html"/>
+
+        <!--预受要约-->
+        <server
+            name="TRADE_YSYY"
+            description="交易模块的预受要约地址"
+            domain="www/m/trade/views/ysyy/ysyyApplyOther.html"/>
+
+        <!--股转买入-->
+        <server
+            name="TRADE_THREE_BUY"
+            description="交易模块的三板买入地址"
+            domain="www/m/trade/views/third/order/limitPriceBuy.html"/>
+
+        <!--股转卖出-->
+        <server
+            name="TRADE_THREE_SELL"
+            description="交易模块的三板卖出地址"
+            domain="www/m/trade/views/third/order/limitPriceSell.html"/>
+
+        <!-- 生产环境蘑菇，汇积分 -->
+        <server
+            name="MOGU_DES_KEY"
+            description="蘑菇H5页面post请求数据加密key"
+            domain=""
+            ip="pro-1bf7fc764d0a8637b2a4a5e0f97b"/>
+
+        <!--<server-->
+        <!--name="HJF_URL"-->
+        <!--description="汇积分加载地址生产环境的公共部分"-->
+        <!--domain=""-->
+        <!--ip="scmobile"/>-->
+
+        <server
+            name="HJF_URL"
+            description="汇积分加载地址生产环境的公共部分"
+            domain=""
+            ip="115.238.43.242"/>
+
+        <server
+            name="MOGU_MAIN_URL_PART"
+            description="蘑菇首页加载地址的一部分,用于做返回逻辑判断"
+            domain=""
+            ip="game-mobile/h5/index.html"/>
+
+        <!-- 后续移除 -->
+        <server
+            name="TRADE_URL"
+            certificatePath=""
+            description="交易url"
+            domain=""
+            ip="http://119.29.254.199:8080/servlet/call?"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="YY_LOGIN_URL"
+            certificatePath=""
+            description="YY信息url"
+            domain=""
+            ip="http://zhyw.sczq.com.cn/account/account/otplogin.do?"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="YY_GIFT_URL"
+            certificatePath=""
+            description="YY信息url"
+            domain=""
+            ip="http://zhyw.sczq.com.cn/"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="INVEST_URL_IMG"
+            certificatePath=""
+            description="文件服务器下载地址，原生使用"
+            domain="http://106.39.48.182:8091/unsafty"
+            ip=""
+            method="get"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="YY_LIVE_URL"
+            certificatePath=""
+            description="YY信息url，原生使用"
+            domain=""
+            ip="http://zhyw.sczq.com.cn/shark/servlet/json?"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="YY_SHARE_URL"
+            certificatePath=""
+            description="YY信息url"
+            domain=""
+            ip="https://zhyw.sczq.com.cn/ygt/servlet/json?"
+            route="false"
+            timeout="10000"/>
+
+        <server
+            name="URL_INVEST_COUNSELOR"
+            certificatePath=""
+            description="云投顾URL接口"
+            domain="http://106.39.48.174:8090/tg/servlet/json?"
+            ip=""
+            retry="0"
+            route="true"
+            timeout="30000"/>
+
+        <server
+            name="URL_INVEST_COUNSELOR_IMG"
+            certificatePath=""
+            description="云投顾图片的URL接口"
+            domain="http://106.39.48.174:8090/tg"
+            ip=""
+            retry="0"
+            route="true"
+            timeout="30000"/>
+
+        <!--h5地址改版，统一都用原生配置-->
+
+        <!--开户-->
+        <server
+            name="FQ_H5_OPEN"
+            certificatePath=""
+            description="开户"
+            domain=""
+            ip="http://106.39.48.174:8090/kh"
+            route="false"
+            timeout="10000"/>
+
+        <!--http统一接入-->
+        <server
+            name="FQ_H5_CHILD"
+            certificatePath=""
+            description="Http统一接入地址"
+            domain=""
+            ip="http://106.39.48.174:8090"
+            route="false"
+            timeout="10000"/>
+
+        <!--文件服务器-->
+        <server
+            name="FQ_H5_FILE_DOWNLOADER"
+            certificatePath=""
+            description="文件服务器地址"
+            domain="http://106.39.48.182:8091"
+            ip=""
+            method="get"
+            route="false"
+            timeout="10000"/>
+
+        <!--http行情-->
+        <server
+            name="FQ_H5_HQ"
+            certificatePath=""
+            description="Http行情地址"
+            domain=""
+            ip="http://trade.sczq.com.cn:8012"
+            route="false"
+            timeout="10000"/>
+
+        <!--第三方积分-->
+        <server
+            name="FQ_H5_JF_THREE"
+            certificatePath=""
+            description="第三方汇积分地址"
+            domain=""
+            ip="http://115.238.43.242:8090"
+            route="false"
+            timeout="10000"/>
+
+        <!--第三方聚源移动资讯地址-->
+        <server
+            name="FQ_H5_MALL_LIGHTYY_THREE"
+            certificatePath=""
+            description="聚源移动资讯地址"
+            domain=""
+            ip="https://ae7qyvegz.lightyy.com"
+            route="false"
+            timeout="10000"/>
+
+        <!--h5地址改版，统一都用原生配置-->
+
+    </room>
+
+
+</rooms>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016.
+  ~ 思迪信息有限公司
+  ~ All right reserved.
+  -->
+
+<!--socket 请求配置文件
+    socketType: 可选值为(A,HK,BF,TRADE); 此字段用于行情socket请求，标明此地址是用于港股行情还是A股行情,还是债卷期权；
+     -->
+<servers
+    description="服务器地址配置，speedUrl为测速地址，updateUrl为更新地址"
+    speedUrl=""
+    updateUrl="https://tianxia.cindasc.com:9602/servlet/json?">
+
+    <server
+        name="THINKIVE_SOCKET_URL"
+        description="思迪统一接入地址"
+        socketType="TK_SOCKET"
+        timeout="60000"
+        value="106.39.48.182:8083"/>
+    <server
+        name="TK_SyntheticalUrl_SOCKET"
+        description="思迪统一接入地址"
+        socketType="TK_SOCKET"
+        timeout="60000"
+        value="106.39.48.182:8083"/>
+
+    <!--    speedPath="/speed.jsp"  需要测试需要配置上-->
+    <server
+        name="HQ_URL_SOCKET"
+        description="行情server地址"
+        socketType="A"
+        timeout="2000"
+        value="61.178.81.134:11001|115.85.254.15:11001|218.203.215.131:11001|125.75.3.10:11001"/>
+
+
+    <server
+        name="HQ_PUSH_SOCKET"
+        description="行情推送地址"
+        socketType="A"
+        value="61.178.81.134:11002|115.85.254.15:11002|218.203.215.131:11002|125.75.3.10:11002"/>
+
+    <server
+        name="HQ_BOND_FUTURES_SOCKET"
+        description="期货行情地址"
+        socketType="BF"
+        value="183.57.43.58:5006"/>
+
+    <server
+        name="HQ_QQQH_PUSH_SOCKET"
+        description="期货行情推送地址"
+        route="true"
+        value="183.57.43.58:5007"/>
+
+    <server
+        name="HQ_WARN_URL"
+        description="预警地址"
+        domain=""
+        socketType="TK_SOCKET"
+        value="106.39.48.182:8083" />
+
+    <server
+        name="HQ_INFO_URL"
+        description="行情资讯地址"
+        socketType="TK_SOCKET"
+        timeout="20000"
+        value="106.39.48.182:8083"/>
+
+    <server
+        name="HQ_SYSC_OPTIONAL_URL"
+        description="行情自选股同步地址"
+        socketType="TK_SOCKET"
+        timeout="20000"
+        value="106.39.48.182:8083" />
+
+    <!--183.57.43.58:40000-->
+    <server
+        name="HQ_HK_URL_SOCKET"
+        description="港股行情地址"
+        domain=""
+        socketType="HK"
+        value="183.57.43.58:40000"/>
+
+    <server
+        name="SOCKET_TRADE_URL"
+        description="交易C接入"
+        socketType="TK_SOCKET"
+        value="211.103.203.53:8088"/>
+</servers>

@@ -17,7 +17,7 @@ public final class TkRetrofit {
      */
     private static final String RETROFIT_BASE_URL = "http://www.baidu.com/";
     final Retrofit defaultRetrofit;
-    static List<IRequestInterceptor> requestInterceptors;
+    static List<IRequestInterceptor> requestInterceptors ;
     static List<IResponseInterceptor> responseInterceptors;
 
     public static TkRetrofit get() {

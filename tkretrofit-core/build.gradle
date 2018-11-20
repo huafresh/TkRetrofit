@@ -25,6 +25,12 @@ android {
             dirs 'libs','../app/libs'
         }
     }
+
+    android.libraryVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "tkRetrofit-${defaultConfig.versionName}.aar"
+        }
+    }
 }
 
 dependencies {
@@ -35,6 +41,6 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     compile(name: "thinkive-framework-$rootProject.thinkiveFrameworkVersion", ext: 'aar')
-    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
     compile "io.reactivex.rxjava2:rxandroid:2.0.2"
 }

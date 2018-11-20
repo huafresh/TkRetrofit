@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configs>
+    <!--配置系统通用参数-->
+    <system-config>
+        <item
+            name="charset"
+            description="编码方式,用于网络请求"
+            value="utf-8"/>
+        <item
+            name="isDebug"
+            description="调试模式,控制log输出"
+            value="true"/>
+        <item
+            name="STATUS_BAR_COLOR"
+            description="状态栏颜色"
+            value="#ea333c"/>
+
+        <item
+            name="IS_THIRD_INTEGRATION"
+            description="是否为第三方集成版本，true表示是，false表示不是"
+            value="false"/>
+        <item
+            name="VIDEO_SAVE_PATH"
+            value="/mobiletrader"/>
+        <item
+            name="IMG_SIZE"
+            description="影像大小，单位为KB"
+            value="150"/>
+        <item
+            name="SMS_CHANNEL"
+            description="发送验证码的短信通道号码"
+            value="10698000088536606"/>
+        <item
+            name="LICENSE"
+            description="思迪证书签名控件License"
+            value="0WSw/sVOP9zYVpad6rHySkoRbb5f2kwfWz985+SutTF/h+x0AuNh9zWj8qA09iBDN41n1oKnTwNMGDc0gNr1OpqgkotfiJKZ/fGR2ETMgKOeDHkxZiaM6Kqw1AGEgOFjvByk1kO6BrcFBd7TugT5+Z7UJqUsIw7KfIK3ipM/ULw="/>
+        <item
+            name="CHECK_SUCCESS"
+            description="视频见证成功消息"
+            value="SYS:10000"/>
+        <item
+            name="CHECK_FAILED"
+            description="视频见证失败消息"
+            value="SYS:10001"/>
+        <item
+            name="USER_LEAVE_ROOM"
+            description="手动退出房间"
+            value="SYS:10002"/>
+        <item
+            name="SEAT_LEAVE_ROOM"
+            description="坐席退出房间，针对恶意账户清除出队列"
+            value="SYS:10003"/>
+        <item
+            name="SEAT_FORCE_QUIT"
+            description="坐席强制退出房间"
+            value="SYS:10004"/>
+        <item
+            name="USER_CONFIRM_QUIT"
+            description="用户确认退出房间"
+            value="SYS:10005"/>
+        <item
+            name="SEAT_REFRESH_IE"
+            description="坐席刷新浏览器"
+            value="SYS:10006"/>
+        <item
+            name="NETWORK_PROBLEM"
+            description="网络问题"
+            value="SYS:10007"/>
+        <item
+            name="VIDEO_PROBLEM"
+            description="视频问题 "
+            value="SYS:10008"/>
+        <item
+            name="CHECK_REJECT"
+            description="用户驳回"
+            value="SYS:10009"/>
+        <item
+            name="TEXT_MSG"
+            description="文字消息"
+            value="USR:0:"/>
+        <item
+            name="webviewCount"
+            description="webview管理池中webview的个数"
+            value="20"/>
+        <item
+            name="FEEDBACK_APP_KEY"
+            description="用户反馈appkey"
+            value="23363111"/>
+        <item
+            name="NORMAL_ACCT_TYPE"
+            description="普通交易账户类型"
+            value="201|207|208|209|210"/>
+        <item
+            name="http-address-xml"
+            description="HTTP请求对应环境的配置文件"
+            value="http_address"/>
+        <item
+            name="socket-address-xml"
+            description="TCP请求对应环境的配置文件"
+            value="socket_address"/>
+
+        <item
+            name="serverCer"
+            description="socket服务端证书"
+            value="server.cer"/>
+        <item
+            name="clientCer"
+            description="socket服务端证书"
+            value="client.cer"/>
+        <item
+            name="privateKey"
+            description="客户端证书私钥，android端必须要pkcs8格式的pem文件"
+            value="client-key.p12"/>
+        <item
+            name="disableWebViewCache"
+            description="是否采用webview重用机制,(此配置项用于少数情况，如每次进入activity或fragmeng需要构建新的webview)"
+            value="false"/>
+        <item
+            name="HTTP_TRADE_IMAGE_URL_PATH"
+            description="Http模式下，交易图片验证码的路径"
+            value="servlet/NewImage?"/>
+
+        <item
+            name="SOCKET_COMPANY_ID"
+            description="C版统一接入的公司ID"
+            value="THINKIVE"/>
+
+        <item
+            name="SOCKET_SYS_SYSTEM_ID"
+            description="C版统一接入的系统ID"
+            value="BASECIF"/>
+
+        <item
+            name="SOCKET_FILE_SYSTEM_ID"
+            description="C版统一接入的系统ID"
+            value="BASEFILE"/>
+
+        <item
+            name="SOCKET_INFO_SYSTEM_ID"
+            description="C版统一接入的资讯部分系统ID"
+            value="BASEINFO"/>
+
+        <item
+            name="SOCKET_MALL_SYSTEM_ID"
+            description="C版统一接入的商城部分系统ID"
+            value="LCSMALL"/>
+
+        <item
+            name="SOCKET_TRADE_SYSTEM_ID"
+            description="C版统一接入的系统ID"
+            value="TRADE"/>
+
+    </system-config>
+
+    <!--配置系统业务模块 -->
+    <!--module name不能定义为common，common关键字保留给框架使用-->
+    <module-config>
+
+        <module
+            name="hq"
+            class="com.thinkive.android.invest_app.agent.HqDispatcher"
+            description="行情入口模块"/>
+    </module-config>
+
+
+    <!--推送SDK配置系统通用参数-->
+    <system-config>
+        <item
+            name="serverCer"
+            description="socket服务端证书"
+            value="server.cer"/>
+        <item
+            name="clientCer"
+            description="socket服务端证书"
+            value="client.cer"/>
+        <item
+            name="privateKey"
+            description="客户端证书私钥，android端必须要pkcs8格式的pem文件"
+            value="client-key.p12"/>
+        <item
+            name="companyId"
+            description="公司ID[Socket请求参数]"
+            value="THINKIVE"/>
+        <item
+            name="systemId"
+            description="系统ID[Socket请求参数]"
+            value="BASEPUSH"/>
+        <item
+            name="msgType"
+            description="消息类型[Socket请求参数]"
+            value="0"/>
+        <item
+            name="socketType"
+            description="socket类型[Socket请求配置]"
+            value="TK_SOCKET"/>
+        <item
+            name="push-client-config-xml"
+            description="emqtt连接对应环境的配置文件"
+            value="tk_push_options_sc"/>
+        <item
+            name="push-support-config-xml"
+            description="sdk对应环境的配置文件"
+            value="tk_pushsupport_options_sc"/>
+    </system-config>
+    <!--推送SDK配置系统通用参数-->
+</configs>

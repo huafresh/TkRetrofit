@@ -21,6 +21,10 @@ public class RequestBeanHelper {
         this.params = requestBean.getParam();
     }
 
+    public RequestBean getRequestBean() {
+        return requestBean;
+    }
+
     public void addHeader(String key, String value) {
         if (headers == null) {
             headers = new HashMap<>();
@@ -29,7 +33,7 @@ public class RequestBeanHelper {
         requestBean.setHeader(headers);
     }
 
-    public void addParam(String key,String value){
+    public void addParam(String key, String value) {
         if (params == null) {
             params = new HashMap<>();
         }
