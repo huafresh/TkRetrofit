@@ -30,6 +30,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -90,6 +91,7 @@ class TkRequest {
 
                 requestBean.setShouldCache(shouldCache);
                 requestBean.setCacheTimeout(cacheTimeout);
+
 
             }
         }

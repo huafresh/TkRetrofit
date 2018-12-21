@@ -20,7 +20,7 @@ import retrofit2.http.Query;
 
 public interface ITestApi {
 
-    @GET(value = "/") //retrofit要求一定要有，这里的value值没什么用，可以随便设置
+    @GET(value = "/") //retrofit要求一定要有，这里的value值没什么用，可以随便设置，但是不可为空
     @Headers({
             Constant.PARAM_COMPANYID + ":THINKIVE",
             Constant.PARAM_SYSTEMID + ":LCSMALL"

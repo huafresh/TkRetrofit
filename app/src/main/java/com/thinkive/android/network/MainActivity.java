@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onRequest(RequestBeanHelper requestBeanHelper) {
                         //请求拦截，只针对本次请求有效
-                        //返回false，则终止本次请求
+                        //返回true，则终止本次请求
                         Log.e("@@@hua", "request = " + printLogForRequestUrl(requestBeanHelper.getRequestBean()));
                         return false;
                     }
