@@ -17,10 +17,14 @@ import com.thinkive.android.tkretrofit.IResponseInterceptor;
 import com.thinkive.android.tkretrofit.RequestBeanHelper;
 import com.thinkive.android.tkretrofit.TkRetrofit;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import okhttp3.CacheControl;
+import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -36,6 +40,30 @@ public class MainActivity extends AppCompatActivity {
                 doRequest();
             }
         });
+
+        findViewById(R.id.test_cahe).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testCache();
+            }
+        });
+    }
+
+    private void testCache() {
+        TkRetrofit.get()
+                .create(ITestApi.class)
+                .testCache()
+                .subscribe(new BaseRequestObserver<JSONObject>() {
+                    @Override
+                    protected void onSuccess(Context context, JSONObject result) {
+                        Log.e("@@@hua", "test cache result = " + result.toString());
+                    }
+
+                    @Override
+                    protected void onFailed(Context context, BaseRequestException e) {
+                        Log.e("@@@hua", "test cache failed");
+                    }
+                });
     }
 
     private void doRequest() {

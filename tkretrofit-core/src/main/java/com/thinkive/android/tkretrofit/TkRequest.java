@@ -2,12 +2,14 @@ package com.thinkive.android.tkretrofit;
 
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.thinkive.framework.network.NetWorkService;
 import com.android.thinkive.framework.network.ProtocolType;
 import com.android.thinkive.framework.network.RequestBean;
 import com.android.thinkive.framework.network.ResponseListener;
 import com.android.thinkive.framework.network.http.HttpRequestBean;
+import com.android.thinkive.framework.network.http.RequestMethod;
 import com.android.thinkive.framework.network.socket.SocketRequestBean;
 import com.android.thinkive.framework.util.JsonParseUtil;
 
@@ -30,7 +32,6 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Retrofit;
@@ -47,11 +48,17 @@ class TkRequest {
     private Annotation[] annotations;
     private List<IRequestInterceptor> requestInterceptors = new ArrayList<>();
     private List<IResponseInterceptor> responseInterceptors = new ArrayList<>();
+    private ICache<JSONObject> tkCache;
+
+    TkRequest() {
+        tkCache = new TkCache();
+    }
 
     private @Nullable
-    RequestBean resolveRequestBean(Request request) {
+    RequestBeanExt resolveRequestBean(Request request) {
         RequestBean requestBean = null;
 
+        boolean shouldCache = false;
         //先解析Service注解
         for (Annotation annotation : annotations) {
             if (annotation instanceof SERVICE) {
@@ -59,7 +66,7 @@ class TkRequest {
                 ProtocolType type = ((SERVICE) annotation).protocolType();
                 String funcNo = ((SERVICE) annotation).funcNo();
                 String bizCode = ((SERVICE) annotation).bizCode();
-                boolean shouldCache = ((SERVICE) annotation).shouldCache();
+                shouldCache = ((SERVICE) annotation).shouldCache();
                 long cacheTimeout = ((SERVICE) annotation).cacheTimeout();
 
                 if (TextUtils.isEmpty(url)) {
@@ -88,16 +95,17 @@ class TkRequest {
                     params.put("funcNo", funcNo);
                 }
                 requestBean.setParam(params);
-
-                requestBean.setShouldCache(shouldCache);
-                requestBean.setCacheTimeout(cacheTimeout);
-
-
             }
         }
 
         //然后把Request的相关参数拷贝到RequestBean
         if (requestBean != null) {
+            //请求方式
+            if (requestBean instanceof HttpRequestBean) {
+                String method = request.method();
+                ((HttpRequestBean) requestBean).setRequestMethod(convertMethod(method));
+            }
+
             //请求头
             HashMap<String, String> header = requestBean.getHeader();
             if (header == null) {
@@ -116,6 +124,7 @@ class TkRequest {
             if (paramMap == null) {
                 paramMap = new HashMap<>();
             }
+
             //处理Params注解
             for (Annotation annotation : annotations) {
                 if (annotation instanceof Params) {
@@ -137,37 +146,82 @@ class TkRequest {
             //其他的比如requestBody需要时可以自行支持。
         }
 
-        return requestBean;
+        RequestBeanExt requestBeanExt = new RequestBeanExt(requestBean);
+        requestBeanExt.setShouldCache(shouldCache);
+        return requestBeanExt;
+    }
+
+    private RequestMethod convertMethod(String method) {
+        switch (method) {
+            case "GET":
+                return RequestMethod.GET;
+            case "POST":
+                return RequestMethod.POST;
+            default:
+                return RequestMethod.GET;
+        }
     }
 
     private void doRequest(final Emitter emitter) {
         final Request request = originalCall.request();
-        RequestBean requestBean = resolveRequestBean(request);
-        if (requestBean != null) {
-            runRequestInterceptor(requestBean);
-            NetWorkService.getInstance().request(requestBean, new ResponseListener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject jsonObject) {
-                    JSONObject newJsonObject = runResponseInterceptor(jsonObject);
+        RequestBeanExt requestBeanExt = resolveRequestBean(request);
+        if (requestBeanExt != null) {
+            if (runRequestInterceptor(requestBeanExt.requestBean)) {
+                return;
+            }
 
-                    if (responseType == JSONObject.class) {
-                        emitter.onNext(newJsonObject);
-                    } else if (responseType == String.class) {
-                        emitter.onNext(newJsonObject.toString());
-                    } else {
-                        Object result = JsonParseUtil.parseJsonToObject(newJsonObject.toString(),
-                                (Class<Object>) responseType);
-                        if (result == null) {
-                            emitter.onError(new Exception("解析" + responseType + "时出错"));
+            final RequestBean requestBean = requestBeanExt.requestBean;
+
+            if (requestBeanExt.isShouldCache()) {
+                JSONObject cache = this.tkCache.getCache(requestBean);
+                if (cache != null) {
+                    emitResult(cache, emitter);
+                    //Log.e("@@@hua", "use cache");
+                    //发请求获取最新数据然后缓存。
+                    NetWorkService.getInstance().request(requestBean,
+                            new ResponseListener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject jsonObject) {
+                                    tkCache.putCache(requestBean, jsonObject);
+                                }
+
+                                @Override
+                                public void onErrorResponse(Exception e) {
+
+                                }
+                            });
+                    return;
+                }
+            }
+
+            NetWorkService.getInstance().request(requestBean,
+                    new ResponseListener<JSONObject>() {
+                        @Override
+                        public void onResponse(JSONObject jsonObject) {
+                            emitResult(jsonObject, emitter);
+                            tkCache.putCache(requestBean, jsonObject);
                         }
-                    }
-                }
 
-                @Override
-                public void onErrorResponse(Exception e) {
-                    emitter.onError(e);
-                }
-            });
+                        @Override
+                        public void onErrorResponse(Exception e) {
+                            emitter.onError(e);
+                        }
+                    });
+        }
+    }
+
+    private void emitResult(JSONObject origin, Emitter emitter) {
+        JSONObject newJsonObject = runResponseInterceptor(origin);
+        if (responseType == JSONObject.class) {
+            emitter.onNext(newJsonObject);
+        } else if (responseType == String.class) {
+            emitter.onNext(newJsonObject.toString());
+        } else {
+            Object result = JsonParseUtil.parseJsonToObject(newJsonObject.toString(),
+                    (Class<Object>) responseType);
+            if (result == null) {
+                emitter.onError(new Exception("解析" + responseType + "时出错"));
+            }
         }
     }
 
@@ -181,12 +235,15 @@ class TkRequest {
         return temp;
     }
 
-    private void runRequestInterceptor(RequestBean requestBean) {
+    private boolean runRequestInterceptor(RequestBean requestBean) {
         for (IRequestInterceptor interceptor : requestInterceptors) {
             if (interceptor != null) {
-                interceptor.onRequest(new RequestBeanHelper(requestBean));
+                if (interceptor.onRequest(new RequestBeanHelper(requestBean))) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     Observable<?> createObservable(Call<Object> call,
