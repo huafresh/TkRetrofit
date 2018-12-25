@@ -43,6 +43,8 @@ import retrofit2.Retrofit;
 
 @SuppressWarnings("unchecked")
 class TkRequest {
+    public static final String ERROR_NO = "error_no";
+    public static final String ERROR_INFO = "error_info";
     private Call originalCall;
     private Type responseType;
     private Annotation[] annotations;
@@ -211,17 +213,35 @@ class TkRequest {
     }
 
     private void emitResult(JSONObject origin, Emitter emitter) {
-        JSONObject newJsonObject = runResponseInterceptor(origin);
-        if (responseType == JSONObject.class) {
-            emitter.onNext(newJsonObject);
-        } else if (responseType == String.class) {
-            emitter.onNext(newJsonObject.toString());
-        } else {
-            Object result = JsonParseUtil.parseJsonToObject(newJsonObject.toString(),
-                    (Class<Object>) responseType);
-            if (result == null) {
-                emitter.onError(new Exception("解析" + responseType + "时出错"));
+        JSONObject newJsonObject = null;
+        try {
+            newJsonObject = runResponseInterceptor(origin);
+        } catch (Exception e) {
+            emitter.onError(e);
+            return;
+        }
+
+        String errorNo = null;
+        if (newJsonObject.has(ERROR_NO)) {
+            errorNo = newJsonObject.optString(ERROR_NO);
+            if ("0".equals(errorNo)) {
+                if (responseType == JSONObject.class) {
+                    emitter.onNext(newJsonObject);
+                } else if (responseType == String.class) {
+                    emitter.onNext(newJsonObject.toString());
+                } else {
+                    Object result = JsonParseUtil.parseJsonToObject(newJsonObject.toString(),
+                            (Class<Object>) responseType);
+                    if (result == null) {
+                        emitter.onError(new Exception("解析" + responseType + "时出错"));
+                    }
+                }
+            } else {
+                String errorInfo = newJsonObject.optString(ERROR_INFO);
+                emitter.onError(new BaseRequestException(errorNo, errorInfo));
             }
+        } else {
+            emitter.onError(new BaseRequestException("返回json没有error_no字段"));
         }
     }
 
