@@ -69,7 +69,6 @@ class TkRequest {
                 String funcNo = ((SERVICE) annotation).funcNo();
                 String bizCode = ((SERVICE) annotation).bizCode();
                 shouldCache = ((SERVICE) annotation).shouldCache();
-                long cacheTimeout = ((SERVICE) annotation).cacheTimeout();
 
                 if (TextUtils.isEmpty(url)) {
                     throw new IllegalArgumentException("url can not be empty");
