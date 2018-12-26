@@ -15,6 +15,13 @@
         />
 
     <Button
+        android:id="@+id/request_notice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="请求公告资讯"
+        />
+
+    <Button
         android:id="@+id/test_cahe"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

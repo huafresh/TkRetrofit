@@ -2,9 +2,12 @@ package com.thinkive.android.network;
 
 import com.android.thinkive.framework.network.ProtocolType;
 import com.android.thinkive.framework.util.Constant;
+import com.thinkive.android.tkretrofit.Params;
 import com.thinkive.android.tkretrofit.SERVICE;
 
 import org.json.JSONObject;
+
+import java.util.List;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
@@ -36,4 +39,13 @@ public interface ITestApi {
     @SERVICE(url = "http://wanandroid.com/article/listproject/0/json",
             shouldCache = true)
     Observable<JSONObject> testCache();
+
+    @GET(value = "/")
+    @SERVICE(url = "http://info.thinkive.com:8082/servlet/json")
+    @Params({
+            "funcNo:200303",
+            "catalogid:1"
+    })
+    Observable<List<NoticeInfoBean>> getNoticeInfoList(@Query(value = "curpage") String curPage);
+
 }

@@ -21,12 +21,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import okhttp3.CacheControl;
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +42,26 @@ public class MainActivity extends AppCompatActivity {
                 doRequest();
             }
         });
+
+        findViewById(R.id.request_notice) .setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        TkRetrofit.get()
+                                .create(ITestApi.class)
+                                .getNoticeInfoList("1")
+                                .subscribe(new BaseRequestObserver<List<NoticeInfoBean>>() {
+                                    @Override
+                                    protected void onSuccess(Context context, List<NoticeInfoBean> result) {
+                                        Log.e("@@@hua","notice success");
+                                    }
+
+                                    @Override
+                                    protected void onFailed(Context context, BaseRequestException e) {
+                                        Log.e("@@@hua","notice failed, msg = "+e.getErrorInfo());
+                                    }
+                                });
+                    }
+                });
 
         findViewById(R.id.test_cahe).setOnClickListener(new View.OnClickListener() {
             @Override

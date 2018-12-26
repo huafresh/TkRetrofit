@@ -31,4 +31,9 @@ dependencies {
 
     compile project(':tkretrofit-core')
     compile 'com.mcxiaoke.volley:library:1.0.19'
+    compile files('libs/jackson-all-1.9.11.jar')
+
+    compile(name: "thinkive-framework-$rootProject.thinkiveFrameworkVersion", ext: 'aar')
+    compile 'com.squareup.retrofit2:retrofit:2.4.0'
+    compile "io.reactivex.rxjava2:rxandroid:2.0.2"
 }

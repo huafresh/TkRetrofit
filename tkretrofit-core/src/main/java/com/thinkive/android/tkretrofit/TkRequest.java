@@ -2,7 +2,6 @@ package com.thinkive.android.tkretrofit;
 
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.thinkive.framework.network.NetWorkService;
 import com.android.thinkive.framework.network.ProtocolType;
@@ -13,9 +12,12 @@ import com.android.thinkive.framework.network.http.RequestMethod;
 import com.android.thinkive.framework.network.socket.SocketRequestBean;
 import com.android.thinkive.framework.util.JsonParseUtil;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,8 +45,12 @@ import retrofit2.Retrofit;
 
 @SuppressWarnings("unchecked")
 class TkRequest {
-    public static final String ERROR_NO = "error_no";
-    public static final String ERROR_INFO = "error_info";
+    private static final String DS_NAME = "dsName";
+    private static final String ERROR_NO = "error_no";
+    private static final String ERROR_INFO = "error_info";
+    private static final String ERRORNO = "errorNo";
+    private static final String ERRORINFO = "errorInfo";
+
     private Call originalCall;
     private Type responseType;
     private Annotation[] annotations;
@@ -177,70 +183,134 @@ class TkRequest {
                 JSONObject cache = this.tkCache.getCache(requestBean);
                 if (cache != null) {
                     emitResult(cache, emitter);
-                    //Log.e("@@@hua", "use cache");
-                    //发请求获取最新数据然后缓存。
-                    NetWorkService.getInstance().request(requestBean,
-                            new ResponseListener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject jsonObject) {
-                                    tkCache.putCache(requestBean, jsonObject);
-                                }
-
-                                @Override
-                                public void onErrorResponse(Exception e) {
-
-                                }
-                            });
+                    //发请求获取最新数据但是不回调。
+                    sendRequest(requestBean, null);
                     return;
                 }
             }
 
-            NetWorkService.getInstance().request(requestBean,
-                    new ResponseListener<JSONObject>() {
-                        @Override
-                        public void onResponse(JSONObject jsonObject) {
-                            emitResult(jsonObject, emitter);
-                            tkCache.putCache(requestBean, jsonObject);
-                        }
-
-                        @Override
-                        public void onErrorResponse(Exception e) {
-                            emitter.onError(e);
-                        }
-                    });
+            sendRequest(requestBean, emitter);
         }
     }
 
+    private void sendRequest(final RequestBean requestBean, final Emitter emitter) {
+        NetWorkService.getInstance().request(requestBean,
+                new ResponseListener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        if (emitter != null) {
+                            emitResult(jsonObject, emitter);
+                        }
+                        tkCache.putCache(requestBean, jsonObject);
+                    }
+
+                    @Override
+                    public void onErrorResponse(Exception e) {
+
+                    }
+                });
+    }
+
     private void emitResult(JSONObject origin, Emitter emitter) {
-        JSONObject newJsonObject = null;
+        JSONObject jsonObject = null;
         try {
-            newJsonObject = runResponseInterceptor(origin);
+            jsonObject = runResponseInterceptor(origin);
         } catch (Exception e) {
             emitter.onError(e);
             return;
         }
 
-        String errorNo = null;
-        if (newJsonObject.has(ERROR_NO)) {
-            errorNo = newJsonObject.optString(ERROR_NO);
-            if ("0".equals(errorNo)) {
-                if (responseType == JSONObject.class) {
-                    emitter.onNext(newJsonObject);
-                } else if (responseType == String.class) {
-                    emitter.onNext(newJsonObject.toString());
+        if (responseType == JSONObject.class) {
+            emitter.onNext(jsonObject);
+        } else if (responseType == String.class) {
+            emitter.onNext(jsonObject.toString());
+        } else {
+            String errorNo;
+            String errorInfo;
+
+            if (jsonObject.has(ERROR_NO)) {
+                errorNo = jsonObject.optString(ERROR_NO);
+                if ("0".equals(errorNo)) {
+                    //调用接口正常
+                    parseResult(jsonObject, emitter);
                 } else {
-                    Object result = JsonParseUtil.parseJsonToObject(newJsonObject.toString(),
-                            (Class<Object>) responseType);
-                    if (result == null) {
-                        emitter.onError(new Exception("解析" + responseType + "时出错"));
-                    }
+                    // 调用接口其他异常
+                    errorInfo = jsonObject.optString(ERROR_INFO);
+                    emitter.onError(new BaseRequestException(errorNo, errorInfo));
+                }
+            } else if (jsonObject.has(ERRORNO)) {
+                errorNo = jsonObject.optString(ERRORNO);
+                if ("0".equals(errorNo)) {
+                    //调用接口正常
+                    parseResult(jsonObject, emitter);
+                } else {
+                    //调用接口异常
+                    errorInfo = jsonObject.optString(ERRORINFO);
+                    emitter.onError(new BaseRequestException(String.valueOf(errorNo), errorInfo));
                 }
             } else {
-                String errorInfo = newJsonObject.optString(ERROR_INFO);
-                emitter.onError(new BaseRequestException(errorNo, errorInfo));
+                emitter.onError(new BaseRequestException("-120", "服务器返回数据没有error_no或者errorNo"));
             }
+        }
+    }
+
+    private void parseResult(JSONObject jsonObject, Emitter emitter) {
+        String errorInfo = null;
+        String dsName = null;
+        JSONArray dsNameArray = jsonObject.optJSONArray(DS_NAME);
+        if (dsNameArray == null) {
+            dsName = jsonObject.optString(DS_NAME);
         } else {
-            emitter.onError(new BaseRequestException("返回json没有error_no字段"));
+            try {
+                dsName = dsNameArray.getString(0);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (TextUtils.isEmpty(dsName)) {
+            Object o = JsonParseUtil.parseJsonToObject(jsonObject.toString(), (Class<Object>) responseType);
+            if (o != null) {
+                emitter.onNext(o);
+            } else {
+                emitter.onError(new BaseRequestException("没有dsName且也无法解析成returnType" + responseType));
+            }
+            return;
+        }
+
+        JSONArray dataArray = jsonObject.optJSONArray(dsName);
+        JSONObject dataObject = jsonObject.optJSONObject(dsName);
+        if (dataArray != null) {
+            if (responseType instanceof ParameterizedType) {
+                if (((ParameterizedType) responseType).getRawType() == List.class) {
+                    Type modelType = ((ParameterizedType) responseType).getActualTypeArguments()[0];
+                    List<Object> list = JsonParseUtil.paseJsonToList(dataArray.toString(),
+                            (Class<Object>) modelType);
+                    if (list != null) {
+                        emitter.onNext(list);
+                    } else {
+                        errorInfo = "无法解析" + dsName + "的内容为" + responseType;
+                    }
+                } else {
+                    errorInfo = "返回的" + dsName + "的内容是JSONArray，无法解析成" + responseType + "。请改成List<T>";
+                }
+            } else {
+                errorInfo = "要解析成list，则必须指定list的泛型";
+            }
+        }
+
+        if (dataObject != null) {
+            Object o = JsonParseUtil.parseJsonToObject(dataObject.toString(),
+                    (Class<Object>) responseType);
+            if (o != null) {
+                emitter.onNext(o);
+            } else {
+                errorInfo = "无法解析" + dsName + "的内容为" + responseType;
+            }
+        }
+
+        if (!TextUtils.isEmpty(errorInfo)) {
+            emitter.onError(new BaseRequestException(errorInfo));
         }
     }
 
