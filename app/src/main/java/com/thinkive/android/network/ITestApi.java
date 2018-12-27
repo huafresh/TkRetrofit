@@ -46,6 +46,6 @@ public interface ITestApi {
             "funcNo:200303",
             "catalogid:1"
     })
-    Observable<List<NoticeInfoBean>> getNoticeInfoList(@Query(value = "curpage") String curPage);
+    Observable<NoticeInfoBean> getNoticeInfoList(@Query(value = "curpage") String curPage);
 
 }

@@ -43,14 +43,7 @@ import retrofit2.Retrofit;
  * @version 2018/10/26 10:14
  */
 
-@SuppressWarnings("unchecked")
 class TkRequest {
-    private static final String DS_NAME = "dsName";
-    private static final String ERROR_NO = "error_no";
-    private static final String ERROR_INFO = "error_info";
-    private static final String ERRORNO = "errorNo";
-    private static final String ERRORINFO = "errorInfo";
-
     private Call originalCall;
     private Type responseType;
     private Annotation[] annotations;
@@ -220,97 +213,8 @@ class TkRequest {
             return;
         }
 
-        if (responseType == JSONObject.class) {
-            emitter.onNext(jsonObject);
-        } else if (responseType == String.class) {
-            emitter.onNext(jsonObject.toString());
-        } else {
-            String errorNo;
-            String errorInfo;
-
-            if (jsonObject.has(ERROR_NO)) {
-                errorNo = jsonObject.optString(ERROR_NO);
-                if ("0".equals(errorNo)) {
-                    //调用接口正常
-                    parseResult(jsonObject, emitter);
-                } else {
-                    // 调用接口其他异常
-                    errorInfo = jsonObject.optString(ERROR_INFO);
-                    emitter.onError(new BaseRequestException(errorNo, errorInfo));
-                }
-            } else if (jsonObject.has(ERRORNO)) {
-                errorNo = jsonObject.optString(ERRORNO);
-                if ("0".equals(errorNo)) {
-                    //调用接口正常
-                    parseResult(jsonObject, emitter);
-                } else {
-                    //调用接口异常
-                    errorInfo = jsonObject.optString(ERRORINFO);
-                    emitter.onError(new BaseRequestException(String.valueOf(errorNo), errorInfo));
-                }
-            } else {
-                emitter.onError(new BaseRequestException("-120", "服务器返回数据没有error_no或者errorNo"));
-            }
-        }
-    }
-
-    private void parseResult(JSONObject jsonObject, Emitter emitter) {
-        String errorInfo = null;
-        String dsName = null;
-        JSONArray dsNameArray = jsonObject.optJSONArray(DS_NAME);
-        if (dsNameArray == null) {
-            dsName = jsonObject.optString(DS_NAME);
-        } else {
-            try {
-                dsName = dsNameArray.getString(0);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (TextUtils.isEmpty(dsName)) {
-            Object o = JsonParseUtil.parseJsonToObject(jsonObject.toString(), (Class<Object>) responseType);
-            if (o != null) {
-                emitter.onNext(o);
-            } else {
-                emitter.onError(new BaseRequestException("没有dsName且也无法解析成returnType" + responseType));
-            }
-            return;
-        }
-
-        JSONArray dataArray = jsonObject.optJSONArray(dsName);
-        JSONObject dataObject = jsonObject.optJSONObject(dsName);
-        if (dataArray != null) {
-            if (responseType instanceof ParameterizedType) {
-                if (((ParameterizedType) responseType).getRawType() == List.class) {
-                    Type modelType = ((ParameterizedType) responseType).getActualTypeArguments()[0];
-                    List<Object> list = JsonParseUtil.paseJsonToList(dataArray.toString(),
-                            (Class<Object>) modelType);
-                    if (list != null) {
-                        emitter.onNext(list);
-                    } else {
-                        errorInfo = "无法解析" + dsName + "的内容为" + responseType;
-                    }
-                } else {
-                    errorInfo = "返回的" + dsName + "的内容是JSONArray，无法解析成" + responseType + "。请改成List<T>";
-                }
-            } else {
-                errorInfo = "要解析成list，则必须指定list的泛型";
-            }
-        }
-
-        if (dataObject != null) {
-            Object o = JsonParseUtil.parseJsonToObject(dataObject.toString(),
-                    (Class<Object>) responseType);
-            if (o != null) {
-                emitter.onNext(o);
-            } else {
-                errorInfo = "无法解析" + dsName + "的内容为" + responseType;
-            }
-        }
-
-        if (!TextUtils.isEmpty(errorInfo)) {
-            emitter.onError(new BaseRequestException(errorInfo));
+        if (TkRetrofit.resultEmitter != null) {
+            TkRetrofit.resultEmitter.emitResult(jsonObject, responseType, emitter);
         }
     }
 

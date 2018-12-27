@@ -17,8 +17,9 @@ public final class TkRetrofit {
      */
     private static final String RETROFIT_BASE_URL = "http://www.baidu.com/";
     final Retrofit defaultRetrofit;
-    static List<IRequestInterceptor> requestInterceptors ;
+    static List<IRequestInterceptor> requestInterceptors;
     static List<IResponseInterceptor> responseInterceptors;
+    static IResultEmitter resultEmitter = new DefaultResultEmitter();
 
     public static TkRetrofit get() {
         return Holder.S_INSTANCE;
@@ -61,6 +62,13 @@ public final class TkRetrofit {
             responseInterceptors = new ArrayList<>();
         }
         responseInterceptors.add(interceptor);
+    }
+
+    public static void setResultEmitter(IResultEmitter emitter) {
+        if (emitter == null) {
+            throw new IllegalArgumentException("result emitter can not be null");
+        }
+        resultEmitter = emitter;
     }
 
 }

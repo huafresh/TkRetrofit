@@ -43,25 +43,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        findViewById(R.id.request_notice) .setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.request_notice).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TkRetrofit.get()
+                        .create(ITestApi.class)
+                        .getNoticeInfoList("1")
+//                        .subscribe(new BaseRequestObserver<List<NoticeInfoBean>>() {
+//                            @Override
+//                            protected void onSuccess(Context context, List<NoticeInfoBean> result) {
+//                                Log.e("@@@hua", "notice success, num = " + result.size());
+//                            }
+//
+//                            @Override
+//                            protected void onFailed(Context context, BaseRequestException e) {
+//                                Log.e("@@@hua", "notice failed, msg = " + e.getErrorInfo());
+//                            }
+//                        });
+                .subscribe(new BaseRequestObserver<NoticeInfoBean>() {
                     @Override
-                    public void onClick(View v) {
-                        TkRetrofit.get()
-                                .create(ITestApi.class)
-                                .getNoticeInfoList("1")
-                                .subscribe(new BaseRequestObserver<List<NoticeInfoBean>>() {
-                                    @Override
-                                    protected void onSuccess(Context context, List<NoticeInfoBean> result) {
-                                        Log.e("@@@hua","notice success");
-                                    }
+                    protected void onSuccess(Context context, NoticeInfoBean result) {
+                        Log.e("@@@hua", "notice success, result = " + result);
+                    }
 
-                                    @Override
-                                    protected void onFailed(Context context, BaseRequestException e) {
-                                        Log.e("@@@hua","notice failed, msg = "+e.getErrorInfo());
-                                    }
-                                });
+                    @Override
+                    protected void onFailed(Context context, BaseRequestException e) {
+                        Log.e("@@@hua", "notice failed, msg = " + e.getErrorInfo());
                     }
                 });
+            }
+        });
 
         findViewById(R.id.test_cahe).setOnClickListener(new View.OnClickListener() {
             @Override
